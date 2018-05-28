@@ -1,11 +1,9 @@
 MoaT-GPIO
 =========
 
-Welcome to `MoaT-GPIO <https://github.com/M-o-a-T/>`__!
+This program controls GPIO lines via AMQP.
+Currently it supports basic Linux GPIO features, i.e. input, output, and line monitoring.
 
-Control GPIO lines via AMQP
+Home page: `MoaT-GPIO <https://github.com/M-o-a-T/>`__
 
 License: Your choice of MIT or Apache License 2.0
-
-COOKIECUTTER-TRIO-TODO: finish filling in your README!
-Must be valid ReST; also used as the PyPI description.
