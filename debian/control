@@ -1,0 +1,23 @@
+Source: moat-gpio
+Maintainer: Matthias Urlichs <matthias@urlichs.de>
+Section: python
+Priority: optional
+Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 9)
+Standards-Version: 3.9.6
+Homepage: https://github.com/M-o-a-T/
+
+Package: python3-moat-gpio
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends}
+Description: Control GPIO lines via AMQP
+ MoaT-GPIO
+ =========
+ .
+ This program controls GPIO lines via AMQP.
+ Currently it supports basic Linux GPIO features, i.e. input, output, and line monitoring.
+ .
+ Home page: `MoaT-GPIO <https://github.com/M-o-a-T/>`__
+ .
+ License: Your choice of MIT or Apache License 2.0
+ .
+
