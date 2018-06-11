@@ -12,7 +12,7 @@ from . import __version__
 from .main import run
 
 import logging
-logger = logging.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 def version_msg():
     python_version = sys.version[:3]
@@ -48,7 +48,7 @@ async def main(config, verbose):
             config = config['config']
 
     # TODO configure logger via YAML
-    configure_logger(stream_level='DEBUG' if verbose else 'INFO')
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
     try:
         await run(config)

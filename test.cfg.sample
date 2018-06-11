@@ -29,12 +29,13 @@ config:
   gpio:
     default:
       chip: 0 # please use labels instead
-      exch: "gpio"
+      exchange: "gpio"
+      exchange_type: "topic"
       queue: ""
       name: "gpio_{chip}_{pin}"
       route: "gpio.{dir}.{chip}.{pin}"
-      on: 'on'
-      off: 'off'
+      'on': 'on' # simplejson auto-transmutes keys also
+      'off': 'off'
       json: none
       # if 'json' is set, use JSON for incoming data
       # interpreted as an array or dotted path, i.e. 'input.pin'
@@ -43,9 +44,12 @@ config:
       # Formatting: pin chip dir name
 
     in:
-      chip: 0
-      pin: 12
-      notify: both # up down ## anything else: no notification
+      foo:
+        chip: 0
+        pin: 12
+        notify: both # up down ## anything else: no notification
     out:
-      chip: 0
-      pin: 12
+      default: {}
+      bar:
+        chip: 0
+        pin: 12
