@@ -31,7 +31,8 @@ config:
       chip: 0 # please use labels instead
       exchange: "gpio"
       exchange_type: "topic"
-      queue: ""
+      exchange_reply: ""
+      queue: ""  # random, auto-generated
       name: "gpio_{chip}_{pin}"
       route: "gpio.{dir}.{chip}.{pin}"
       'on': 'on' # simplejson auto-transmutes keys also

@@ -24,7 +24,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'moat-gpio = moat_gpio.__main__:main',
+            'moat-gpiod = moat_gpio.cli:daemon',
+            'moat-gpio-set = moat_gpio.cli:set',
         ]
     },
     python_requires=">=3.5",

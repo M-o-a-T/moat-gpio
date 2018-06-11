@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import math
 import trio
 
 from trio_amqp import connect_amqp
-from .io import Chips,Input,Output
+from ..io import Chips,Input,Output
 
 import logging
 logger = logging.getLogger(__name__)
@@ -28,4 +29,5 @@ async def run(config):
                         io = cls(**cfg)
                         await nursery.start(io.run, amqp, chips.add(io.chip))
                 logger.info("Running.")
+                await trio.sleep(math.inf)
 

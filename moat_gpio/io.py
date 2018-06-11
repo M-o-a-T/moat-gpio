@@ -7,6 +7,9 @@ from copy import deepcopy
 from ._default import DEFAULT_QUEUE, DEFAULT_EXCHANGE, DEFAULT_ROUTE, DEFAULT_NAME
 from json import loads as json_decode
 
+import logging
+logger = logging.getLogger(__name__)
+
 class _io:
     def __init__(self, **cfg):
         self.chip = cfg['chip']
@@ -18,7 +21,7 @@ class _io:
         D['name']=self.name
 
         self.exch = cfg.get('exchange', DEFAULT_EXCHANGE).format(**D)
-        self.exch_type = cfg.get('exchange_type', "topic").format(**D)
+        self.exch_type = cfg.get('exchange_type', "topic")
         self.queue = cfg.get('queue', DEFAULT_QUEUE).format(**D)
         self.on_data = cfg.get('on', 'on')
         self.off_data = cfg.get('off', 'off')
@@ -47,13 +50,15 @@ class Input(_io):
         async with amqp.new_channel() as chan:
             await chan.exchange_declare(self.exch, self.exch_type)
             pin = chip.line(self.pin)
-            with pin.monitor(gpio.REQUEST_EVENT_BOTH_EDGES):
+            with chip.line(self.pin).monitor(gpio.REQUEST_EVENT_BOTH_EDGES) as pin:
                 task_status.started()
 
+                logger.debug("Mon started %s %d", self.chip,self.pin)
                 async for evt in pin:
-                    await self.handle_event(e, chan)
+                    logger.debug("Mon Evt %s %d =%s", self.chip,self.pin, evt)
+                    await self.handle_event(evt, chan)
 
-    async def handle_event(self, e):
+    async def handle_event(self, e, chan):
         """Process a single event."""
         self.value = e.value
         if e.value in self.skip:
@@ -62,17 +67,27 @@ class Input(_io):
         data = data.format(dir='in', chip=self.chip, pin=self.pin, name=self.name)
         data = data.encode("utf-8")
 
-        await chan.basic_publish(data, exchange_name=self.exch, routing_key=self.route)
+        logger.debug("Pub %s to %s %s",repr(data), self.exch, self.route)
+        await chan.basic_publish(payload=data, exchange_name=self.exch, routing_key=self.route)
 
 
 class Output(_io):
-    dir='out'
     """Represesent an Output pin: change a pin whenever a specific AMQP message arrives."""
+    dir='out'
+
+    def __init__(self, **cfg):
+        super().__init__(**cfg)
+        self.on_data_reply = cfg.get('on', self.on_data)
+        self.off_data_reply = cfg.get('off', self.off_data)
+        self.exch_reply = cfg.get('exch_reply', "")
+
     async def run(self, amqp, chip, task_status=trio.TASK_STATUS_IGNORED):
         """Task handler for processing this output."""
         async with amqp.new_channel() as chan:
             await chan.exchange_declare(self.exch, self.exch_type)
-            await chan.queue_declare(queue_name=self.queue)
+            res = await chan.queue_declare(queue_name=self.queue, durable=False, exclusive=True, auto_delete=True)
+            self.queue = res['queue']
+            logger.debug("Bind %s %s %s", self.queue,self.exch,self.route)
             await chan.queue_bind(self.queue, self.exch, routing_key=self.route)
 
             pin = chip.line(self.pin)
@@ -82,25 +97,43 @@ class Output(_io):
 
                     try:
                         async for body, envelope, properties in listener:
-                            self.handle_msg(body, envelope, properties, line)
+                            await self.handle_msg(chan, body, envelope, properties, line)
                     finally:
-                        pin.value = 0
+                        line.value = 0
 
-    async def handle_msg(self, body, envelope, properties, line):
+    async def handle_msg(self, chan, body, envelope, properties, line):
         """Process one incoming message."""
-        data = data.decode("utf-8")
+        data = body.decode("utf-8")
         if self.json_path is not None:
             data = json_decode(data)
             for p in self.json_path:
                 data = data[p]
         if data == self.on_data:
-            line.value = 1
+            line.value = value = 1
         elif data == self.off_data:
-            line.value = 0
+            line.value = value = 0
         else:
             logger.warn("%s: unknown data %s", self.exch,line.value)
+            await chan.basic_client_nack(delivery_tag=envelope.delivery_tag)
+            return
+        logger.debug("set %s to %s",self.name, value)
 
-        await chan.basic_publish(data)
+        # reply?
+        if properties.reply_to:
+            data = self.on_data_reply if value else self.off_data_reply
+            data = data.format(dir='ack', chip=self.chip, pin=self.pin, name=self.name)
+            data = data.encode("utf-8")
+
+            await self.chan.basic_publish(
+                payload=data,
+                exchange_name=self.exchange_reply,
+                routing_key=properties.reply_to,
+                properties={
+                    'correlation_id': properties.correlation_id,
+                },
+            )
+
+        await chan.basic_client_ack(delivery_tag=envelope.delivery_tag)
 
 
 class Chips(contextlib.ExitStack):

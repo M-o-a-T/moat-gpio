@@ -9,7 +9,8 @@ import yaml
 import trio_click as click
 
 from . import __version__
-from .main import run
+from .cmd.daemon import run as _daemon
+from .cmd.set import run as _set
 
 import logging
 logger = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ def version_msg():
     '-v', '--verbose',
     is_flag=True, help='Print debug information', default=False
 )
-async def main(config, verbose):
+async def daemon(config, verbose):
     """Hook GPIO lines to AMQP.
 
     MoaT is free and open source software, developed and managed by
@@ -51,9 +52,43 @@ async def main(config, verbose):
     logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
     try:
-        await run(config)
+        await _daemon(config)
     except KeyboardInterrupt:
         logger.info("Program interrupted.")
 
-if __name__ == "__main__":
-    main()
+@click.command(context_settings=dict(help_option_names=[u'-h', u'--help']))
+@click.version_option(__version__, u'-V', u'--version', message=version_msg())
+@click.argument('port', nargs=1)
+@click.argument('value', nargs=1, type=bool)
+@click.option('--config','-c', help="config file", default="/etc/moat.cfg")
+@click.option(
+    '-v', '--verbose',
+    is_flag=True, help='Print debug information', default=False
+)
+async def set(config, verbose, port, value):
+    """Set GPIO lines via AMQP.
+
+    MoaT is free and open source software, developed and managed by
+    volunteers. If you would like to help out or fund the project, please get
+    in touch at https://github.com/M-o-a-T.
+    """
+    with open(config,"r") as f:
+        config = yaml.safe_load(f)
+
+    if 'gpio' not in config:
+        try:
+            config['config']['gpio']
+        except KeyError:
+            logger.error("he configuration doesn't cointain any GPIO")
+            return
+        else:
+            config = config['config']
+
+    # TODO configure logger via YAML
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+
+    try:
+        await _set(config, port, value)
+    except KeyboardInterrupt:
+        logger.info("Program interrupted.")
+
