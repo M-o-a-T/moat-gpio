@@ -1,0 +1,51 @@
+config:
+  amqp:
+    server:
+      host: localhost
+      login: guest
+      password: guest
+      virtualhost: /moat
+  logging:
+    version: 1
+    loggers: {}
+    root:
+      handlers: [stderr]
+      level: INFO
+    handlers:
+      logfile:
+        class: logging.FileHandler
+        filename: test.log
+        level: DEBUG
+        formatter: std
+      stderr:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: std
+        stream: ext://sys.stderr
+    formatters:
+      std:
+        class: moat.util.TimeOnlyFormatter
+        format: '%(asctime)s %(levelname)s:%(name)s:%(message)s'
+  gpio:
+    default:
+      chip: 0 # please use labels instead
+      exch: "gpio"
+      queue: ""
+      name: "gpio_{chip}_{pin}"
+      route: "gpio.{dir}.{chip}.{pin}"
+      on: 'on'
+      off: 'off'
+      json: none
+      # if 'json' is set, use JSON for incoming data
+      # interpreted as an array or dotted path, i.e. 'input.pin'
+      # will extract 'on' from {'input':{'pin':'on'}}
+      # set to an empty string (i.e. "") for simply de-quoting a JSON-encoded string
+      # Formatting: pin chip dir name
+
+    in:
+      chip: 0
+      pin: 12
+      notify: both # up down ## anything else: no notification
+    out:
+      chip: 0
+      pin: 12

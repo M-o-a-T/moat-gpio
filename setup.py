@@ -17,10 +17,16 @@ setup(
     install_requires=[
         "trio-amqp",
         "trio-gpio",
+        "trio-click",
     ],
     keywords=[
         "gpio", "amqp",
     ],
+    entry_points={
+        'console_scripts': [
+            'moat-gpio = moat_gpio.__main__:main',
+        ]
+    },
     python_requires=">=3.5",
     classifiers=[
         "License :: OSI Approved :: MIT License",
