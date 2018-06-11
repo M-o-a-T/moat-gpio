@@ -8,6 +8,9 @@
 MoaT-GPIO: Control GPIO lines via AMQP
 ======================================
 
+The central part of this package is a small daemon (``moat-gpiod``)
+which links GPIO lines to AMQP.
+
 .. toctree::
    :maxdepth: 2
 
