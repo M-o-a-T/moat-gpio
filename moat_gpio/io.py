@@ -11,6 +11,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 class _io:
+    has_default = False
+    is_sub = False
+
     def __init__(self, **cfg):
         self.chip = cfg['chip']
         self.pin = cfg['pin']
@@ -20,16 +23,25 @@ class _io:
         self.name = name.format(**D)
         D['name']=self.name
 
-        self.exch = cfg.get('exchange', DEFAULT_EXCHANGE).format(**D)
-        self.exch_type = cfg.get('exchange_type', "topic")
-        self.queue = cfg.get('queue', DEFAULT_QUEUE).format(**D)
-        self.on_data = cfg.get('on', 'on')
-        self.off_data = cfg.get('off', 'off')
-        self.route = cfg.get('route', DEFAULT_ROUTE).format(**D)
+        if self.is_sub:
+            self.data = cfg['data']
+        else:
+            self.exch = cfg.get('exchange', DEFAULT_EXCHANGE).format(**D)
+            self.exch_type = cfg.get('exchange_type', "topic")
+            self.queue = cfg.get('queue', DEFAULT_QUEUE).format(**D)
+
+            self.on_data = cfg.get('on', 'on')
+            self.off_data = cfg.get('off', 'off')
+            self.route = cfg.get('route', DEFAULT_ROUTE).format(**D)
 
         self.json_path = cfg.get('json', None)
         if isinstance(self.json_path,str) and self.json_path != '':
-            self.json_path = self.json_path.split('.')
+            def elem(k):
+                try:
+                    return int(k)
+                except ValueError:
+                    return k
+            self.json_path = [ elem(k) for k in self.json_path.split('.') ]
 
 class Input(_io):
     """Represesent an Input pin: send a message whenever a pin level changes."""
@@ -45,8 +57,9 @@ class Input(_io):
         if notify in ('both','down'):
             self.skip.remove(0)
 
-    async def run(self, amqp, chip, task_status=trio.TASK_STATUS_IGNORED):
+    async def run(self, amqp, chips, nursery, task_status=trio.TASK_STATUS_IGNORED):
         """Task handler for processing this output."""
+        chip = chips.add(self.chip)
         async with amqp.new_channel() as chan:
             await chan.exchange_declare(self.exch, self.exch_type)
             pin = chip.line(self.pin)
@@ -70,6 +83,84 @@ class Input(_io):
         logger.debug("Pub %s to %s %s",repr(data), self.exch, self.route)
         await chan.basic_publish(payload=data, exchange_name=self.exch, routing_key=self.route)
 
+class Pulse:
+    """Represent a number of Output pins: message X pulses the pin named X.
+    Only one pin is active at any time."""
+    has_default = True
+
+    def __init__(self, **cfg):
+        self.outputs = {}
+        d = cfg.pop('default')
+
+        D = {}
+        name = d.get('name', DEFAULT_NAME)
+        self.name = name.format(**D)
+        D['group']=self.name
+
+        self.exch = d.get('exchange', DEFAULT_EXCHANGE).format(**D)
+        self.exch_type = d.get('exchange_type', "topic")
+        self.queue = d.get('queue', DEFAULT_QUEUE).format(**D)
+        self.exch_reply = cfg.get('exch_reply', "")
+
+        for k,v in cfg.values():
+            cfg = d.copy()
+            cfg.update(v)
+            self.outputs[k] = Output(**cfg)
+
+    async def run(self, amqp, chips, nursery, task_status=trio.TASK_STATUS_IGNORED):
+        queues = {}
+        for k,v in self.outputs.items():
+            q,r = (trio.Queue(0), trio.Queue(0))
+            queues[k] = (q,r,v)
+            await nursery.start(v.run_sub, chips, q,r)
+        
+        async with amqp.new_channel() as chan:
+            await chan.exchange_declare(self.exch, self.exch_type)
+            res = await chan.queue_declare(queue_name=self.queue, durable=False, exclusive=True, auto_delete=True)
+            self.queue = res['queue']
+            logger.debug("Bind %s %s %s", self.queue,self.exch,self.route)
+            await chan.queue_bind(self.queue, self.exch, routing_key=self.route)
+
+            with pin.open(direction=gpio.DIRECTION_OUTPUT) as line:
+                task_status.started()
+
+                async for body, envelope, properties in listener:
+                    await self.handle_msg(chan, queues, body, envelope, properties, line)
+
+    async def handle_msg(self, chan, queues, body, envelope, properties, line):
+        """Process one incoming message."""
+        data = body.decode("utf-8")
+        if self.json_path is not None:
+            data = json_decode(data)
+            for p in self.json_path:
+                data = data[p]
+        try:
+            output = queues[data]
+        except KeyError:
+            logger.warn("%s: unknown data %s", self.exch,line.value)
+            await chan.basic_client_nack(delivery_tag=envelope.delivery_tag)
+            return
+        logger.debug("pulse %s",output.name)
+        await output.queue.put(None)
+        await output.reply_queue.get()
+        logger.debug("pulse %s done",output.name)
+
+        # reply?
+        if properties.reply_to:
+            data = output.data_reply
+            data = data.format(dir='ack', chip=output.chip, pin=output.pin, name=output.name, group=self.name)
+            data = data.encode("utf-8")
+
+            await self.chan.basic_publish(
+                payload=data,
+                exchange_name=self.exchange_reply,
+                routing_key=properties.reply_to,
+                properties={
+                    'correlation_id': properties.correlation_id,
+                },
+            )
+
+        await chan.basic_client_ack(delivery_tag=envelope.delivery_tag)
 
 class Output(_io):
     """Represesent an Output pin: change a pin whenever a specific AMQP message arrives."""
@@ -81,8 +172,9 @@ class Output(_io):
         self.off_data_reply = cfg.get('off', self.off_data)
         self.exch_reply = cfg.get('exch_reply', "")
 
-    async def run(self, amqp, chip, task_status=trio.TASK_STATUS_IGNORED):
+    async def run(self, amqp, chips, nursery, task_status=trio.TASK_STATUS_IGNORED):
         """Task handler for processing this output."""
+        chip = chips.add(self.chip)
         async with amqp.new_channel() as chan:
             await chan.exchange_declare(self.exch, self.exch_type)
             res = await chan.queue_declare(queue_name=self.queue, durable=False, exclusive=True, auto_delete=True)
@@ -134,6 +226,31 @@ class Output(_io):
             )
 
         await chan.basic_client_ack(delivery_tag=envelope.delivery_tag)
+
+class SubOutput(_io):
+    is_sub = True
+    def __init__(self, **cfg):
+        super().__init__(**cfg)
+
+        self.data_reply = cfg.get('reply', self.data)
+        self.on_time = cfg.get('on_time', 1)
+        self.off_time = cfg.get('off_time', 1)
+
+    async def run_sub(self, chips, queue, reply_queue, task_status=trio.TASK_STATUS_IGNORED):
+        """Task handler for processing this output."""
+        self.queue = queue
+        self.reply_queue = reply_queue
+
+        chip = chips.add(self.chip)
+        pin = chip.line(self.pin)
+        with pin.open(direction=gpio.DIRECTION_OUTPUT) as line:
+            task_status.started()
+            async for m in queue:
+                line.value = 1
+                await trio.sleep(self.on_time)
+                line.value = 0
+                await trio.sleep(self.off_time)
+                await reply_queue.put(None)
 
 
 class Chips(contextlib.ExitStack):

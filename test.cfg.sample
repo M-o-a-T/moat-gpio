@@ -54,3 +54,13 @@ config:
       bar:
         chip: 0
         pin: 12
+    pulse:
+      on:
+        pin: 12
+        on_time: 0.3
+      off:
+        pin: 13
+      default:
+        chip: 0
+        on_time: 0.1
+        off_time: 0.1
