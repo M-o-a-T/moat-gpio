@@ -6,10 +6,12 @@ Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 9)
 Standards-Version: 3.9.6
 Homepage: https://github.com/M-o-a-T/
 
-Package: python3-moat-gpio
+Package: moat-gpio
 Architecture: all
 Depends: ${misc:Depends}, ${python3:Depends}
 Recommends: wiringpi
+Replaces: python3-moat-gpio
+Conflicts: python3-moat-gpio
 Description: Control GPIO lines via AMQP
  MoaT-GPIO
  =========
