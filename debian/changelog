@@ -1,3 +1,9 @@
+moat-gpio (0.2.2-1) unstable; urgency=medium
+
+  * Fix setup
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 05 Jul 2018 20:45:46 +0200
+
 moat-gpio (0.2.1-5) unstable; urgency=medium
 
   * Rename binary package

@@ -13,7 +13,7 @@ setup(
     author="Matthias Urlichs",
     author_email="matthias@urlichs.de",
     license="MIT -or- Apache License 2.0",
-    packages=find_packages(),
+    packages=find_packages(exclude="tests"),
     install_requires=[
         "trio-amqp",
         "trio-gpio",
