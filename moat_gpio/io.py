@@ -11,6 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 FLAGS = {'high':0, 'low':gpio.REQUEST_FLAG_ACTIVE_LOW}
+BIAS = {'none':0, 'high':gpio.REQUEST_FLAG_OPEN_DRAIN, 'low':gpio.REQUEST_FLAG_OPEN_SOURCE}
 
 class _io:
     has_default = False
@@ -123,6 +124,7 @@ class Output(_io):
         self.state_exch_type = cfg.get('state_exchange_type', self.exch_type)
         self.state_route = cfg.get('state_route', '').format(**D)
         self.flags = FLAGS[cfg.get('active','high')]
+        self.flags |= BIAS[cfg.get('bias','none')]
 
     async def run(self, amqp, chips, nursery, task_status=trio.TASK_STATUS_IGNORED):
         """Task handler for processing this output."""
@@ -301,6 +303,7 @@ class SubOutput(_io):
         self.on_time = cfg.get('on_time', 1)
         self.off_time = cfg.get('off_time', 1)
         self.flags = FLAGS[cfg.get('active','high')]
+        self.flags |= BIAS[cfg.get('bias','none')]
 
     async def run_sub(self, chips, queue, reply_queue, task_status=trio.TASK_STATUS_IGNORED):
         """Task handler for processing this output."""
