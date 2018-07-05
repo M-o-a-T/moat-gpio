@@ -9,6 +9,7 @@ Homepage: https://github.com/M-o-a-T/
 Package: python3-moat-gpio
 Architecture: all
 Depends: ${misc:Depends}, ${python3:Depends}
+Recommends: wiringpi
 Description: Control GPIO lines via AMQP
  MoaT-GPIO
  =========
