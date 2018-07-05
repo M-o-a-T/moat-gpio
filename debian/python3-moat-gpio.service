@@ -3,4 +3,5 @@ Description=Run moat-gpio
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/moat-gpio /etc/moat/gpio.cfg
+ConditionFileNotEmpty=/etc/moat/gpio.cfg
+ExecStart=/usr/bin/moat-gpio -c /etc/moat/gpio.cfg
