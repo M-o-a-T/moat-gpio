@@ -44,6 +44,9 @@ coverage.xml
 # Translations
 *.mo
 
+# Editor
+*.swp
+
 # Mr Developer
 .mr.developer.cfg
 .project
