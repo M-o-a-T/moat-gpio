@@ -21,17 +21,16 @@ async def run(config):
                     ios = config.get(ios, {})
                     DD = D.copy()
                     DD.update(ios.pop('default',{}))
-                    for name,io in ios.items():
-                        if 'name' not in io:
-                            io['name'] = name
+                    for key,io in ios.items():
                         cfg = DD.copy()
                         if cls.has_default:
                             d = io.get('default',{})
-                            cfg.update[d]
+                            cfg.update(d)
                             io['default'] = cfg
+                            cfg = io
                         else:
                             cfg.update(io)
-                        io = cls(**cfg)
+                        io = cls(key, **cfg)
                         await nursery.start(io.run, amqp, chips, nursery)
                 logger.info("Running.")
                 await trio.sleep(math.inf)

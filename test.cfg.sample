@@ -54,6 +54,7 @@ config:
       bar:
         chip: 0
         pin: 12
+        active: low
     pulse:
       on:
         pin: 12

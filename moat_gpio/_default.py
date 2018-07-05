@@ -2,6 +2,6 @@
 
 DEFAULT_QUEUE=""
 DEFAULT_EXCHANGE="gpio"
-DEFAULT_NAME="gpio"
-DEFAULT_ROUTE="{name}.{dir}.{chip}.{pin}"
+DEFAULT_NAME="{key}"
+DEFAULT_ROUTE="{key}.{dir}"
 

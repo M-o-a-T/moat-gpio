@@ -49,7 +49,7 @@ async def daemon(config, verbose):
             config = config['config']
 
     # TODO configure logger via YAML
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG if verbose else logging.INFO)
 
     try:
         await _daemon(config)
@@ -85,7 +85,7 @@ async def set(config, verbose, port, value):
             config = config['config']
 
     # TODO configure logger via YAML
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG if verbose else logging.INFO)
 
     try:
         await _set(config, port, value)
