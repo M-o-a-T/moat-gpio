@@ -4,6 +4,6 @@ After=network.target
 
 [Service]
 ConditionFileNotEmpty=/etc/moat/gpio.cfg
-ExecStart=/usr/bin/moat-gpio -c /etc/moat/gpio.cfg
+ExecStart=/usr/bin/moat-gpiod -c /etc/moat/gpio.cfg
 Restart=on-failure
 RestartSec=10
