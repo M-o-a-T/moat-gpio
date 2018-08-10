@@ -1,3 +1,9 @@
+moat-gpio (0.2.2-3) unstable; urgency=medium
+
+  * Add WantedBy section to systemd unit file
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 10 Aug 2018 11:27:12 +0200
+
 moat-gpio (0.2.2-2) unstable; urgency=medium
 
   * typo
