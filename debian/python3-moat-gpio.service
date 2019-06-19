@@ -1,6 +1,0 @@
-[Unit]
-Description=Run moat-gpio
-After=network.target
-
-[Service]
-ExecStart=/usr/bin/moat-gpio /etc/moat/gpio.cfg

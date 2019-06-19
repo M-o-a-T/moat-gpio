@@ -1,0 +1,12 @@
+[Unit]
+Description=Run moat-gpio
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ConditionFileNotEmpty=/etc/moat/gpio.cfg
+ExecStart=/usr/bin/moat-gpiod -c /etc/moat/gpio.cfg
+Restart=on-failure
+RestartSec=10

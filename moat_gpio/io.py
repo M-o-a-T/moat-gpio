@@ -63,18 +63,23 @@ class Input(_io):
             self.skip.remove(0)
 
     async def debouncer(self, chan, q, task_status=trio.TASK_STATUS_IGNORED):
-        import time
         task_status.started()
         while True:
-            e1 = await q.get()
+            e = await q.get()
             logger.debug("new %s %s", self.name,e1)
-            e2 = None
+            val = not self.value
+            # something happens. Send an event immediately,
+            # no matter the event's value.
+            await self.handle_event(val, chan)
+
             while True:
                 with trio.move_on_after(abs(self.debounce)) as skip:
                     e2 = await q.get()
                     logger.debug("and %s %s", self.name,e2)
                 if skip.cancelled_caught:
                     break
+
+            logger.debug("done %s %s", self.name,e2)
             if self.debounce < 0:
                 if e2 is None or e1.value == e2.value:
                     await self.handle_event(e1, chan)
@@ -99,14 +104,14 @@ class Input(_io):
                     logger.debug("see %s %s", self.name,evt)
                     await q.put(evt)
 
-    async def handle_event(self, e, chan):
+    async def handle_event(self, val, chan):
         """Process a single event."""
-        self.value = e.value
-        if e.value in self.skip:
-            logger.debug("Skip %s %s",self.name,e)
+        self.value = val
+        if val in self.skip:
+            logger.debug("Skip %s %s",self.name,val)
             return
-        logger.debug("Send %s %s",self.name,e)
-        data = self.on_data if e.value else self.off_data
+        logger.debug("Send %s %s",self.name,val)
+        data = self.on_data if val else self.off_data
         data = data.format(dir='in', chip=self.chip, pin=self.pin, name=self.name)
         data = data.encode("utf-8")
 
