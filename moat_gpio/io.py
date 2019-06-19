@@ -70,14 +70,18 @@ class Input(_io):
             logger.debug("new %s %s", self.name,e1)
             e2 = None
             while True:
-                with trio.move_on_after(self.debounce) as skip:
+                with trio.move_on_after(abs(self.debounce)) as skip:
                     e2 = await q.get()
                     logger.debug("and %s %s", self.name,e2)
                 if skip.cancelled_caught:
                     break
-            await self.handle_event(e1, chan)
-            if e2 is not None and e1.value != e2.value:
-                await self.handle_event(e2, chan)
+            if self.debounce < 0:
+                if e2 is None or e1.value == e2.value:
+                    await self.handle_event(e1, chan)
+            else:
+                await self.handle_event(e1, chan)
+                if e2 is not None and e1.value != e2.value:
+                    await self.handle_event(e2, chan)
 
     async def run(self, amqp, chips, nursery, task_status=trio.TASK_STATUS_IGNORED):
         """Task handler for processing this output."""
