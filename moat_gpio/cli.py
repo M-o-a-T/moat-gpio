@@ -43,7 +43,7 @@ async def daemon(config, verbose):
         try:
             config['config']['gpio']
         except KeyError:
-            logger.error("he configuration doesn't cointain any GPIO")
+            logger.error("the configuration doesn't contain any GPIO")
             return
         else:
             config = config['config']
