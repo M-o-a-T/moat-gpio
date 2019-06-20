@@ -71,6 +71,7 @@ class Input(_io):
             # no matter the event's value.
             await self.handle_event(val, chan)
 
+            e2 = None
             while True:
                 async with anyio.move_on_after(abs(self.debounce)) as skip:
                     e2 = await q.get()
