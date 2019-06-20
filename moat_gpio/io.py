@@ -64,7 +64,7 @@ class Input(_io):
 
     async def debouncer(self, chan, q):
         while True:
-            e = await q.get()
+            e1 = await q.get()
             logger.debug("new %s %s", self.name,e1)
             val = not self.value
             # something happens. Send an event immediately,
