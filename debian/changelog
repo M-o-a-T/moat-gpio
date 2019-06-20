@@ -1,3 +1,9 @@
+moat-gpio (0.3.1-1) unstable; urgency=medium
+
+  * Stupid error
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 20 Jun 2019 14:02:58 +0200
+
 moat-gpio (0.3.0-1) unstable; urgency=medium
 
   * anyio-ized

@@ -32,7 +32,7 @@ async def run(config):
                             cfg.update(io)
                         io = cls(key, **cfg)
                         started = anyio.create_event()
-                        await tg.spawn(io.run, amqp, chips, tg, started=started)
+                        await tg.spawn(io.run, amqp, chips, tg, started)
                         await started.wait()
                 logger.info("Running.")
                 await anyio.sleep(math.inf)
