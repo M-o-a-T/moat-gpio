@@ -1,3 +1,9 @@
+moat-gpio (0.3.3-1) unstable; urgency=medium
+
+  * yet another one
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 20 Jun 2019 17:11:39 +0200
+
 moat-gpio (0.3.2-1) unstable; urgency=medium
 
   * More porting buglets
