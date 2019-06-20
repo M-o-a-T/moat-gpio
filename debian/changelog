@@ -1,3 +1,9 @@
+moat-gpio (0.3.4-1) unstable; urgency=medium
+
+  * *sigh*
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 20 Jun 2019 17:23:00 +0200
+
 moat-gpio (0.3.3-1) unstable; urgency=medium
 
   * yet another one

@@ -328,14 +328,14 @@ class SubOutput(_io):
             if started is not None:
                 await started.set()
             while True:
-                m = await queue.get()
+                m = await self.queue.get()
                 line.value = 1
                 try:
                     await anyio.sleep(self.on_time)
                 finally:
                     line.value = 0
                 await anyio.sleep(self.off_time)
-                await reply_queue.put(None)
+                await self.reply_queue.put(None)
 
 
 class Chips(contextlib.ExitStack):
