@@ -242,10 +242,9 @@ class Pulse:
     async def run(self, amqp, chips, taskgroup, started: anyio.abc.Event = None):
         queues = {}
         for k,v in self.outputs.items():
-            q,r = (anyio.create_queue(1), anyio.create_queue(1))
             queues[k] = v
             done_here = anyio.create_event()
-            await taskgroup.spawn(v.run_sub, chips, q,r, done_here)
+            await taskgroup.spawn(v.run_sub, chips, done_here)
             await done_here.wait()
         
         async with amqp.new_channel() as chan:
@@ -318,10 +317,10 @@ class SubOutput(_io):
         self.flags = FLAGS[cfg.get('active','high')]
         self.flags |= BIAS[cfg.get('bias','none')]
 
-    async def run_sub(self, chips, queue, reply_queue, started: anyio.abc.Event = None):
+    async def run_sub(self, chips, started: anyio.abc.Event = None):
         """Task handler for processing this output."""
-        self.queue = queue
-        self.reply_queue = reply_queue
+        self.queue = anyio.create_queue(1)
+        self.reply_queue = anyio.create_queue(1)
 
         chip = chips.add(self.chip)
         pin = chip.line(self.pin)
