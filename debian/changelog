@@ -1,3 +1,9 @@
+moat-gpio (0.3.0-1) unstable; urgency=medium
+
+  * anyio-ized
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 20 Jun 2019 13:05:16 +0200
+
 moat-gpio (0.2.3-1) unstable; urgency=medium
 
   * Improve debounce.

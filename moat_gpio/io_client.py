@@ -1,7 +1,7 @@
 # INputs and outputs
 
-import trio
-import trio_gpio as gpio
+import anyio
+import asyncgpio as gpio
 import contextlib
 from copy import deepcopy
 from ._default import DEFAULT_QUEUE, DEFAULT_EXCHANGE, DEFAULT_ROUTE, DEFAULT_NAME
@@ -42,11 +42,12 @@ class Output(_io):
         if notify in ('both','down'):
             self.skip.remove(0)
 
-    async def run(self, amqp, value, task_status=trio.TASK_STATUS_IGNORED):
+    async def run(self, amqp, value, started: anyio.abc.Event = None):
         """Task handler for processing this output."""
         async with amqp.new_channel() as chan:
             await chan.exchange_declare(self.exch, self.exch_type)
-            task_status.started()
+            if started is not None:
+                await started.set()
 
             data = self.on_data if value else self.off_data
             data = data.format(dir='ack', chip=self.chip, pin=self.pin, name=self.name)
@@ -64,7 +65,7 @@ class Input(_io):
         self.on_data_reply = cfg.get('on', self.on_data)
         self.off_data_reply = cfg.get('off', self.off_data)
 
-    async def run(self, amqp, chip, task_status=trio.TASK_STATUS_IGNORED):
+    async def run(self, amqp, chip, started: anyio.abc.Event = None):
         """Task handler for processing this output."""
         async with amqp.new_channel() as chan:
             await chan.exchange_declare(self.exch, self.exch_type)
@@ -79,7 +80,8 @@ class Input(_io):
             pin = chip.line(self.pin)
             async with chan.new_consumer(self.queue) as listener:
                 with pin.open(direction=gpio.DIRECTION_OUTPUT) as line:
-                    task_status.started()
+                    if started is not None:
+                        await started.set()
 
                     try:
                         async for body, envelope, properties in listener:

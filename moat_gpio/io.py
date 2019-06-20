@@ -1,7 +1,7 @@
 # INputs and outputs
 
-import trio
-import trio_gpio as gpio
+import anyio
+import asyncgpio as gpio
 import contextlib
 from copy import deepcopy
 from ._default import DEFAULT_QUEUE, DEFAULT_EXCHANGE, DEFAULT_ROUTE, DEFAULT_NAME
@@ -62,8 +62,7 @@ class Input(_io):
         if notify in ('both','down'):
             self.skip.remove(0)
 
-    async def debouncer(self, chan, q, task_status=trio.TASK_STATUS_IGNORED):
-        task_status.started()
+    async def debouncer(self, chan, q):
         while True:
             e = await q.get()
             logger.debug("new %s %s", self.name,e1)
@@ -73,10 +72,10 @@ class Input(_io):
             await self.handle_event(val, chan)
 
             while True:
-                with trio.move_on_after(abs(self.debounce)) as skip:
+                async with anyio.move_on_after(abs(self.debounce)) as skip:
                     e2 = await q.get()
                     logger.debug("and %s %s", self.name,e2)
-                if skip.cancelled_caught:
+                if skip.cancel_called:
                     break
 
             logger.debug("done %s %s", self.name,e2)
@@ -88,16 +87,17 @@ class Input(_io):
                 if e2 is not None and e1.value != e2.value:
                     await self.handle_event(e2, chan)
 
-    async def run(self, amqp, chips, nursery, task_status=trio.TASK_STATUS_IGNORED):
+    async def run(self, amqp, chips, taskgroup, started: anyio.abc.Event=None):
         """Task handler for processing this output."""
         chip = chips.add(self.chip)
         async with amqp.new_channel() as chan:
             await chan.exchange_declare(self.exch, self.exch_type, durable=True)
             pin = chip.line(self.pin)
             with chip.line(self.pin).monitor(gpio.REQUEST_EVENT_BOTH_EDGES, flags=self.flags) as pin:
-                q = trio.Queue(0)
-                await nursery.start(self.debouncer, chan, q)
-                task_status.started()
+                q = anyio.create_queue(0)
+                await taskgroup.spawn(self.debouncer, chan, q)
+                if started is not None:
+                    await started.set()
 
                 logger.debug("Mon started %s %s %d", self.name, self.chip,self.pin)
                 async for evt in pin:
@@ -135,7 +135,7 @@ class Output(_io):
         self.flags = FLAGS[cfg.get('active','high')]
         self.flags |= BIAS[cfg.get('bias','none')]
 
-    async def run(self, amqp, chips, nursery, task_status=trio.TASK_STATUS_IGNORED):
+    async def run(self, amqp, chips, taskgroup, started: anyio.abc.Event = None):
         """Task handler for processing this output."""
         chip = chips.add(self.chip)
         async with amqp.new_channel() as chan:
@@ -151,7 +151,8 @@ class Output(_io):
             async with chan.new_consumer(self.queue) as listener:
                 with pin.open(direction=gpio.DIRECTION_OUTPUT, flags=self.flags) as line:
                     line.value = 0
-                    task_status.started()
+                    if started is not None:
+                        await started.set()
 
                     try:
                         async for body, envelope, properties in listener:
@@ -238,12 +239,12 @@ class Pulse:
             cfg.update(v)
             self.outputs[k] = SubOutput(k, **cfg)
 
-    async def run(self, amqp, chips, nursery, task_status=trio.TASK_STATUS_IGNORED):
+    async def run(self, amqp, chips, taskgroup, started: anyio.abc.Event = None):
         queues = {}
         for k,v in self.outputs.items():
-            q,r = (trio.Queue(0), trio.Queue(0))
+            q,r = (anyio.create_queue(1), anyio.create_queue(1))
             queues[k] = v
-            await nursery.start(v.run_sub, chips, q,r)
+            await taskgroup.spawn(v.run_sub, chips, q,r)
         
         async with amqp.new_channel() as chan:
             await chan.exchange_declare(self.exch, self.exch_type, durable=True)
@@ -255,7 +256,8 @@ class Pulse:
             await chan.queue_bind(self.queue, self.exch, routing_key=self.route)
 
             async with chan.new_consumer(self.queue) as listener:
-                task_status.started()
+                if started is not None:
+                    await started.set()
                 async for body, envelope, properties in listener:
                     await self.handle_msg(chan, queues, body, envelope, properties)
 
@@ -314,7 +316,7 @@ class SubOutput(_io):
         self.flags = FLAGS[cfg.get('active','high')]
         self.flags |= BIAS[cfg.get('bias','none')]
 
-    async def run_sub(self, chips, queue, reply_queue, task_status=trio.TASK_STATUS_IGNORED):
+    async def run_sub(self, chips, queue, reply_queue, sarted: anyio.abc.Event = None):
         """Task handler for processing this output."""
         self.queue = queue
         self.reply_queue = reply_queue
@@ -322,14 +324,15 @@ class SubOutput(_io):
         chip = chips.add(self.chip)
         pin = chip.line(self.pin)
         with pin.open(direction=gpio.DIRECTION_OUTPUT, flags=self.flags) as line:
-            task_status.started()
+            if started is not None:
+                await started.set()
             async for m in queue:
                 line.value = 1
                 try:
-                    await trio.sleep(self.on_time)
+                    await anyio.sleep(self.on_time)
                 finally:
                     line.value = 0
-                await trio.sleep(self.off_time)
+                await anyio.sleep(self.off_time)
                 await reply_queue.put(None)
 
 
@@ -376,10 +379,10 @@ class Chips(contextlib.ExitStack):
 #            s2.update(c)
 #            yield Output(c2)
 #
-#    async def run(self, cfg, task_status=TASK_STATUS_IGNORED):
+#    async def run(self, cfg):
 #        with self as c:
-#            async with trio.open_nursery as n:
+#            async with anyio.create_task_group as n:
 #                for pin in self.io_generate(cfg):
-#                    n.start_soon(pin.run)
+#                    await n.spawn(pin.run)
 #
 #

@@ -8,7 +8,9 @@ Homepage: https://github.com/M-o-a-T/
 
 Package: moat-gpio
 Architecture: all
-Depends: ${misc:Depends}, ${python3:Depends}
+Depends: ${misc:Depends}, ${python3:Depends},
+  python3-asyncamqp,
+  python3-asyncgpio,
 Recommends: wiringpi
 Replaces: python3-moat-gpio
 Conflicts: python3-moat-gpio

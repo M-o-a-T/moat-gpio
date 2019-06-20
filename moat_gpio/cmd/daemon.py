@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import math
-import trio
+import anyio
 
-from trio_amqp import connect_amqp
+from asyncamqp import connect_amqp
 from ..io import Chips,Input,Output,Pulse
 
 import logging
@@ -14,7 +14,7 @@ async def run(config):
     amqp.update(config.get('amqp',{}).get('server',{}))
     config = config['gpio']
     D = config.get('default',{})
-    async with trio.open_nursery() as nursery:
+    async with anyio.create_task_group() as tg:
         with Chips() as chips:
             async with connect_amqp(**amqp) as amqp:
                 for ios,cls in (('in',Input),('out',Output),('pulse',Pulse)):
@@ -31,7 +31,9 @@ async def run(config):
                         else:
                             cfg.update(io)
                         io = cls(key, **cfg)
-                        await nursery.start(io.run, amqp, chips, nursery)
+                        started = anyio.create_event()
+                        await tg.spawn(io.run, amqp, chips, tg, started=started)
+                        await started.wait()
                 logger.info("Running.")
-                await trio.sleep(math.inf)
+                await anyio.sleep(math.inf)
 

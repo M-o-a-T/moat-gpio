@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import trio
+import anyio
 
-from trio_amqp import connect_amqp
+from asyncamqp import connect_amqp
 from ..io_client import Output
 
 import logging
@@ -13,7 +13,7 @@ async def run(config, port, value):
     amqp.update(config.get('amqp',{}).get('server',{}))
     config = config['gpio']
     cfg = config.get('default',{})
-    async with trio.open_nursery() as nursery:
+    async with anyio.create_task_grou() as ntg:
         async with connect_amqp(**amqp) as amqp:
             cfg.update(config['out'].get('default',{}))
             try:

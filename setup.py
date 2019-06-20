@@ -15,8 +15,8 @@ setup(
     license="MIT -or- Apache License 2.0",
     packages=find_packages(exclude="tests"),
     install_requires=[
-        "trio-amqp",
-        "trio-gpio",
+        "asyncamqp",
+        "asyncgpio",
         "trio-click",
     ],
     keywords=[
