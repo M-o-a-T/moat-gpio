@@ -328,7 +328,8 @@ class SubOutput(_io):
         with pin.open(direction=gpio.DIRECTION_OUTPUT, flags=self.flags) as line:
             if started is not None:
                 await started.set()
-            async for m in queue:
+            while True:
+                m = await queue.get()
                 line.value = 1
                 try:
                     await anyio.sleep(self.on_time)
