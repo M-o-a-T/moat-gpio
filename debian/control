@@ -11,6 +11,7 @@ Architecture: all
 Depends: ${misc:Depends}, ${python3:Depends},
   python3-asyncamqp,
   python3-asyncgpio,
+  python3-asyncclick,
 Recommends: wiringpi
 Replaces: python3-moat-gpio
 Conflicts: python3-moat-gpio

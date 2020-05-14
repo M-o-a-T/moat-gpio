@@ -6,7 +6,7 @@ import os
 import sys
 import yaml
 
-import trio_click as click
+import asyncclick as click
 
 from . import __version__
 from .cmd.daemon import run as _daemon

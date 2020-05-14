@@ -1,3 +1,9 @@
+moat-gpio (0.3.6-2) unstable; urgency=medium
+
+  * asyncclick, no more trio-click
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 14 May 2020 09:24:13 +0200
+
 moat-gpio (0.3.6-1) unstable; urgency=medium
 
   * Getting there
