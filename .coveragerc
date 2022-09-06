@@ -1,6 +1,6 @@
 [run]
 branch=True
-source=asyncgpio
+source=moat/gpio
 
 [report]
 precision = 1

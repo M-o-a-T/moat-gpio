@@ -28,8 +28,8 @@ nitpicky = True
 nitpick_ignore = [
     # Format is ("sphinx reference type", "string"), e.g.:
     ("py:obj", "bytes-like"),
-    ("py:class", "asyncgpio.gpio.Chip"),
-    ("py:class", "asyncgpio.gpio.Line"),
+    ("py:class", "moat.gpio.gpio.Chip"),
+    ("py:class", "moat.gpio.gpio.Line"),
 ]
 
 autodoc_inherit_docstrings = False
@@ -71,17 +71,17 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'asyncgpio'
-copyright = 'The asyncgpio authors'
-author = 'The asyncgpio authors'
+project = 'moat-gpio'
+copyright = 'The moat-gpio authors'
+author = 'The moat-gpio authors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-import asyncgpio
-version = asyncgpio.__version__
+import moat.gpio
+version = moat.gpio.__version__
 # The full version, including alpha/beta/rc tags.
 release = version
 

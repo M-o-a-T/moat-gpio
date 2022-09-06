@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 set BUILDDIR=build
-set SPHINXPROJ=asyncgpio
+set SPHINXPROJ=moat-gpio
 
 if "%1" == "" goto help
 

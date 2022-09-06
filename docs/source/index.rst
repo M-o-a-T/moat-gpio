@@ -4,19 +4,19 @@
    contain the root `toctree` directive.
 
 
-============================================
-asyncgpio: GPIO access via Trio and libgpiod
-============================================
+=============================================
+moat-gpio: GPIO access via anyio and libgpiod
+=============================================
 
-Trio-GPIO is a simple wrapper around ``libgpiod``.
+MoaT-GPIO is a simple wrapper around ``libgpiod``.
 
-You can use Trio-GPIO to
+You can use MoaT-GPIO to
 * access a GPIO chip
 * get an object describing a GPIO line
 * open the line for input or output
 * monitor the line for events (without polling!)
 
-Trio-GPIO only supports Linux.
+MoaT-GPIO only supports Linux.
 It uses the "new" GPIO interface, i.e. kernel 4.5 or later is required.
 
 .. toctree::

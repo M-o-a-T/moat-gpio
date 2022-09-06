@@ -1,6 +1,6 @@
 Release history
 ===============
 
-.. currentmodule:: asyncgpio
+.. currentmodule:: moat-gpio
 
 .. towncrier release notes start

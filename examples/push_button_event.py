@@ -1,15 +1,15 @@
 import time
 import anyio
-import asyncgpio as gpio
+import moat.gpio as gpio
 
 """
 This example is taken out of my furnace controller.
-It has been tested with Raspberry Pi Zero W and I assume it will work with any board supported by asyncgpio.
+It has been tested with Raspberry Pi Zero W and I assume it will work with any board supported by moat.gpio.
 Use at your own risk.
 
 If you aren't sure about how to hook up a button and led to your board, there are a lot of examples online.
 
-Thank you @smurfix, who wrote asyncgpio and @njsmith and other in glitter:python-trio/general room
+Thank you @smurfix, who wrote moat.gpio and @njsmith and other in glitter:python-trio/general room
 who helped me out.
 """
 

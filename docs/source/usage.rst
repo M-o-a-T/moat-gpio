@@ -1,14 +1,14 @@
 
-Using AsyncGPIO
+Using MoaT-GPIO
 ===============
 
-.. module: asyncgpio
+.. module: moat.gpio
 
-Using AsyncGPIO generally consists of three steps:
+Using MoaT-GPIO generally consists of three steps:
 Accessing the chip, referring to a GPIO line within that chip.
 and actually using the line for input, output, or monitoring.
 
-AsyncGPIO currently only works with anyio's Trio backend.
+MoaT-GPIO currently only works with anyio's Trio backend.
 
 Accessing a GPIO chip
 ---------------------
@@ -16,12 +16,12 @@ Accessing a GPIO chip
 GPIO chips are accessed by their number. You usually find them as ``/dev/gpiochipN``
 where N starts at zero.
 
-AsyncGPIO refers to GPIO chips by their sequence number.
+MoaT-GPIO refers to GPIO chips by their sequence number.
 You need to refer to your hardware's documentation to discover which chip to use,
 assuming there's more than one.
 
 ::
-    import asyncgpio as gpio
+    import moat.gpio as gpio
 
     def main():
         with gpio.open_chip(0, consumer="example") as chip:
@@ -30,7 +30,7 @@ assuming there's more than one.
 The ``consumer`` argument is optional. It describes your code to the kernel, so that
 a program which enumerates GPIO users can display who currently uses the pin in question.
 
-.. autofunction:: asyncgpio.open_chip
+.. autofunction:: moat.gpio.open_chip
 
 Referring to a line
 -------------------
@@ -45,12 +45,12 @@ You need to refer to your hardware's documentation to discover which line to use
     as an output that's actually an input) may damage your computer or its
     periphera(s).
 
-.. automethod: asyncgpio.gpio.Chip.line
+.. automethod: moat.gpio.Chip.line
 
 .. note::
 
    ``libgpiod`` has functions for bulk referrals which allow you to access multiple lines
-   at the same time. Yo may wonder why these are missing from AsyncGPIO. The answer is that
+   at the same time. Yo may wonder why these are missing from MoaT-GPIO. The answer is that
    the kernel's GPIO interface does not have functions that affect multiple lines; if you
    need them for convenience it's easer to write appropriate Python methods, than to do the
    packing+unpacking of values into C-language structures that these bulk methods require.
@@ -59,7 +59,7 @@ You need to refer to your hardware's documentation to discover which line to use
 Using a line
 ------------
 
-A :class:`asyncgpio.gpio.Line` object just describes a GPIO line; before you can actually
+A :class:`moat.gpio.Line` object just describes a GPIO line; before you can actually
 use it, you need to request it from the kernel (which also prevents anybody else from using
 the line).
 
@@ -71,7 +71,7 @@ the line).
    you need to do ``echo 12 >/sys/class/gpio/unexport`` before your program can access
    line 12.
 
-.. automethod: asyncgpio.Line.open
+.. automethod: moat.gpio.Line.open
 
 Output
 ~~~~~~
@@ -126,9 +126,9 @@ Therefore, it's better to let the kernel signal changes to a GPIO device::
                 async for e in in_:
                     print(e, "on" if e.value else "off", "at", e.time.strftime("%H:%M:%S"))
 
-:: automethod: asyncgpio.gpio.Line.monitor
+:: automethod: moat.gpio.Line.monitor
 
-:: autoclass: asyncgpio.gpio.Event
+:: autoclass: moat.gpio.Event
    :members:
 
 .. note::

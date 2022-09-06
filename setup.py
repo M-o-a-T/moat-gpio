@@ -3,10 +3,10 @@ from setuptools import setup, find_packages
 LONG_DESC = open("README.rst", encoding="utf-8").read()
 
 setup(
-    name="asyncgpio",
+    name="moat-gpio",
     use_scm_version={"version_scheme": "guess-next-dev", "local_scheme": "dirty-tag"},
     description="GPIO access via Trio and libgpiod",
-    url="https://github.com/M-o-a-T/asyncgpio",
+    url="https://github.com/M-o-a-T/moat-gpio",
     long_description=open("README.rst").read(),
     author="Matthias Urlichs",
     author_email="matthias@urlichs.de",

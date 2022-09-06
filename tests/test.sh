@@ -21,6 +21,6 @@ E="/sys/kernel/debug/gpio-mockup-event/$chip"
 H="$(hostname | sed -e 's/\..*//')"
 cd "$cur"
 
-export PYTHONPATH=.:../asyncgpio
+export PYTHONPATH=.:../moat/gpio
 
 python3 tests/run.py $chip
