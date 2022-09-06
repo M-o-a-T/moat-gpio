@@ -1,17 +1,17 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 LONG_DESC = open("README.rst", encoding="utf-8").read()
 
 setup(
-    name="asyncgpio",
+    name="moat-gpio",
     use_scm_version={"version_scheme": "guess-next-dev", "local_scheme": "dirty-tag"},
     description="GPIO access via Trio and libgpiod",
-    url="https://github.com/M-o-a-T/asyncgpio",
+    url="https://github.com/M-o-a-T/moat-gpio",
     long_description=open("README.rst").read(),
     author="Matthias Urlichs",
     author_email="matthias@urlichs.de",
     license="MIT -or- Apache License 2.0",
-    packages=find_packages(),
+    packages=find_namespace_packages(include=['moat.*']),
     setup_requires=["setuptools_scm"],
     install_requires=["anyio", "cffi"],
     keywords=["gpio"],

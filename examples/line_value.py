@@ -1,4 +1,4 @@
-import asyncgpio as gpio
+import moat.gpio as gpio
 import time
 """Flash an output manually.
 

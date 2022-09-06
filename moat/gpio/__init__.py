@@ -1,8 +1,8 @@
-"""Top-level package for asyncgpio."""
+"""Top-level package for moat.gpio."""
 
 import sys
 
-from .gpio import Chip
+from .gpio import Chip, Line, Event
 from .libgpiod import *  # noqa
 
 
@@ -16,6 +16,6 @@ def open_chip(num=None, label=None, consumer=sys.argv[0]):
             Defaults to the program's name.
 
     Returns:
-        a :class:`asyncgpio.gpio.Chip` instance.
+        a :class:`moat.gpio.gpio.Chip` instance.
     """
     return Chip(num=num, label=label, consumer=consumer)

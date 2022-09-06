@@ -1,7 +1,7 @@
-asyncgpio
+moat-gpio
 =========
 
-AsyncGPIO allows easy access to the GPIO pins on your Raspberry Pi or
+MoaT-GPIO allows easy access to the GPIO pins on your Raspberry Pi or
 similar embedded computer.
 
 It is based on libgpiod and its CFFI adapter by Steven P. Goldsmith
@@ -10,7 +10,7 @@ It is based on libgpiod and its CFFI adapter by Steven P. Goldsmith
 
 To run examples, make sure to install `trio` first.
 
-Testing AsyncGPIO requires a Linux distribution that enables the mock-GPIO module.
+Testing MoaT-GPIO requires a Linux distribution that enables the mock-GPIO module.
 As of mid-2020, Debian's kernel does not include this module, but Raspbian's does.
 
 If you can compile your own kernel: the option is named CONFIG_GPIO_MOCKUP,

@@ -1,7 +1,7 @@
 [tool.towncrier]
-package = "asyncgpio"
+package = "moat-gpio"
 filename = "docs/source/history.rst"
 directory = "newsfragments"
 underlines = ["-", "~", "^"]
 # COOKIECUTTER-TRIO-TODO: fill in the URL below to point to your issue tracker:
-issue_format = "`#{issue} <https://github.com/python-trio/asyncgpio/issues/{issue}>`__"
+issue_format = "`#{issue} <https://github.com/M-o-a-T/moat-gpio/issues/{issue}>`__"

@@ -16,16 +16,14 @@ To run yapf
 -----------
 
 * Show what changes yapf wants to make: ``yapf -rpd setup.py
-  asyncgpio tests``
+  moat/gpio tests``
 
 * Apply all changes directly to the source tree: ``yapf -rpi setup.py
-  asyncgpio tests``
+  moat/gpio tests``
 
 
 To make a release
 -----------------
-
-* Update the version in ``asyncgpio/_version.py``
 
 * Run ``towncrier`` to collect your release notes.
 
@@ -35,10 +33,8 @@ To make a release
 
 * Double-check it all works, docs build, etc.
 
-* Build your sdist and wheel: ``python setup.py sdist bdist_wheel``
-
-* Upload to PyPI: ``twine upload dist/*``
-
 * Use ``git tag`` to tag your version.
+
+* ``make pypi``
 
 * Don't forget to ``git push --tags``.
