@@ -36,14 +36,15 @@ repository = "https://github.com/M-o-a-T/moat-gpio"
 [tool.flake8]
 max-line-length = 99
 ignore = [
-	E402,
-	E731,
-	E127,
-	E502,
-	E123,
-	W503,
-	E231,
-	E203,
+	"F401",
+	"E123",
+	"E127",
+	"E203",
+	"E231",
+	"E402",
+	"E502",
+	"E731",
+	"W503",
 	]
 
 [tool.isort]
@@ -68,9 +69,11 @@ setenv =
 
 [testenv:check]
 commands = 
+    pylint moat/gpio tests
     flake8p moat/gpio tests
     black --check moat/gpio tests
 deps = 
+    pylint
     black
     flake8-pyproject
     flake8
@@ -83,3 +86,7 @@ filename = "docs/source/history.rst"
 directory = "newsfragments"
 underlines = [ "-", "~", "^",]
 issue_format = "`#{issue} <https://github.com/M-o-a-T/moat-gpio/issues/{issue}>`__"
+
+[tool.pylint]
+[tool.pylint.messages_control]
+disable = "use-dict-literal,unspecified-encoding,too-many-statements,too-many-return-statements,too-many-locals,too-many-instance-attributes,too-many-branches,too-many-arguments,too-few-public-methods,superfluous-parens,no-else-return,no-else-continue,invalid-name,fixme"
