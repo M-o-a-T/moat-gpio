@@ -2,7 +2,7 @@
 
 import sys
 
-from .gpio import Chip, Event, Line
+from .gpio import Chip, Event, Line  # noqa: F401
 from .libgpiod import *  # noqa
 
 
