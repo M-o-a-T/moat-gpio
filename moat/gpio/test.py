@@ -3,14 +3,14 @@ This module contains helpers for testing async gpio, via the Linux kernel's
 ``gpio_mockup`` module (writing) and ``/sys/kernel/debug/cpio`` (monitoring).
 """
 
+import errno
+import logging
 import os
 import re
-import anyio
-import logging
-import errno
-
-from contextlib import asynccontextmanager
 from collections import namedtuple
+from contextlib import asynccontextmanager
+
+import anyio
 
 logger = logging.getLogger(__name__)
 

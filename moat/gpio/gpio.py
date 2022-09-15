@@ -1,8 +1,9 @@
-from . import libgpiod as gpio
-
-import sys
-import anyio
 import datetime
+import sys
+
+import anyio
+
+from . import libgpiod as gpio
 
 
 class Chip:
@@ -298,8 +299,7 @@ class Line:
 
 
 class Event:
-    """Store a Pythonic representation of an event
-    """
+    """Store a Pythonic representation of an event"""
 
     def __init__(self, ev):
         if ev.event_type == gpio.EVENT_RISING_EDGE:
