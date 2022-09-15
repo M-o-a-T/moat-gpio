@@ -101,7 +101,9 @@ class GpioWatcher:
         sysfs_path: str = "/sys",
     ):
         self.interval = interval
-        self.gpio = open(os.path.join(debugfs_path, "gpio"), "r")
+        self.gpio = open(  # pylint: disable=unspecified-encoding
+            os.path.join(debugfs_path, "gpio"), "r"
+        )
         self.targets = dict()  # chip > line > _GpioPin
         #       self.names = {}
         self.sysfs_path = sysfs_path
@@ -173,7 +175,6 @@ class GpioWatcher:
             else:
                 r = _r_pin.match(line)
                 if not r:
-                    breakpoint()
                     raise ValueError(line)
                 pin = int(r.group("pin")) - base
                 out = r.group("dir") == "out"
