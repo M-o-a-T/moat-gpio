@@ -14,6 +14,7 @@ classifiers = [
 	]
 dependencies = [
 	"anyio ~= 3.0",
+	"cffi",
 	]
 dynamic = [ "version",]
 keywords = [ "MoaT",]
@@ -34,7 +35,16 @@ repository = "https://github.com/M-o-a-T/moat-gpio"
 
 [tool.flake8]
 max-line-length = 99
-ignore = [ "W503", "E231", "E203",]
+ignore = [
+	E402,
+	E731,
+	E127,
+	E502,
+	E123,
+	W503,
+	E231,
+	E203,
+	]
 
 [tool.isort]
 line_length = 99
