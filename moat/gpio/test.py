@@ -11,6 +11,7 @@ from collections import namedtuple
 from contextlib import asynccontextmanager
 
 import anyio
+from moat.util import Queue
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class _GpioPin:
         Values are (out,level) tuples of bool, with "out" and "high"
         represented as True.
         """
-        q = anyio.create_queue(10)
+        q = Queue(10)
         self.mon.add(q)
         try:
             yield q
