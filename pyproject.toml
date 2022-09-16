@@ -36,6 +36,7 @@ repository = "https://github.com/M-o-a-T/moat-gpio"
 [tool.flake8]
 max-line-length = 99
 ignore = [
+	"F841",
 	"F401",
 	"E123",
 	"E127",
@@ -69,6 +70,11 @@ envlist = py310,py39,check
 [testenv]
 setenv = 
     PYTHONPATH = {env:PYTHONPATH}{:}{toxinidir}
+deps = 
+    trio
+    pytest
+commands = 
+    python3 -mpytest tests/
 
 [testenv:check]
 commands = 
@@ -76,6 +82,7 @@ commands =
     flake8p moat/gpio tests
     black --check moat/gpio tests
 deps = 
+    pytest
     pylint
     black
     flake8-pyproject
@@ -92,4 +99,4 @@ issue_format = "`#{issue} <https://github.com/M-o-a-T/moat-gpio/issues/{issue}>`
 
 [tool.pylint]
 [tool.pylint.messages_control]
-disable="use-dict-literal,unspecified-encoding,too-many-statements,too-many-return-statements,too-many-locals,too-many-instance-attributes,too-many-branches,too-many-arguments,too-few-public-methods,superfluous-parens,no-else-return,no-else-continue,invalid-name,fixme"
+disable="wrong-import-order,ungrouped-imports,too-many-nested-blocks,use-dict-literal,unspecified-encoding,too-many-statements,too-many-return-statements,too-many-locals,too-many-instance-attributes,too-many-branches,too-many-arguments,too-few-public-methods,superfluous-parens,no-else-return,no-else-continue,invalid-name,fixme"
