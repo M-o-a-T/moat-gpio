@@ -79,7 +79,7 @@ class _GpioPin:
         logger.debug("SET %s %d %s", self.chip, self.pin, value)
         if self.fd is None:
             raise RuntimeError(
-                "Pin %s/%d is not controlled via the 'gpio_mockup' module" % (self.chip, self.pin)
+                f"Pin {self.chip}/{self.pin} is not controlled via the 'gpio_mockup' module"
             )
         os.write(self.fd, b"1" if value else b"0")
         # os.lseek(self.fd, 0, os.SEEK_SET)

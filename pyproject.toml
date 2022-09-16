@@ -57,6 +57,9 @@ packages = [ "moat.gpio",]
 
 [tool.setuptools_scm]
 
+[tool.black]
+line-length = 99
+
 [tool.tox]
 legacy_tox_ini = """
 [tox]
