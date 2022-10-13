@@ -55,6 +55,8 @@ profile = "black"
 
 [tool.setuptools]
 packages = [ "moat.gpio",]
+[tool.setuptools.package-data]
+"*" = ["*.yaml"]
 
 [tool.setuptools_scm]
 
@@ -65,7 +67,7 @@ line-length = 99
 legacy_tox_ini = """
 [tox]
 isolated_build = True
-envlist = py310,py39,check
+envlist = py310,check
 
 [testenv]
 setenv = 
@@ -78,9 +80,9 @@ commands =
 
 [testenv:check]
 commands = 
-    pylint moat/gpio tests
-    flake8p moat/gpio tests
-    black --check moat/gpio tests
+    pylint moat tests
+    flake8p moat tests
+    black --check moat tests
 deps = 
     pytest
     pylint
@@ -100,3 +102,5 @@ issue_format = "`#{issue} <https://github.com/M-o-a-T/moat-gpio/issues/{issue}>`
 [tool.pylint]
 [tool.pylint.messages_control]
 disable="wrong-import-order,ungrouped-imports,too-many-nested-blocks,use-dict-literal,unspecified-encoding,too-many-statements,too-many-return-statements,too-many-locals,too-many-instance-attributes,too-many-branches,too-many-arguments,too-few-public-methods,superfluous-parens,no-else-return,no-else-continue,invalid-name,fixme"
+
+[tool.moat]
