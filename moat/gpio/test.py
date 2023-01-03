@@ -3,14 +3,15 @@ This module contains helpers for testing async gpio, via the Linux kernel's
 ``gpio_mockup`` module (writing) and ``/sys/kernel/debug/cpio`` (monitoring).
 """
 
+import errno
+import logging
 import os
 import re
-import anyio
-import logging
-import errno
-
-from contextlib import asynccontextmanager
 from collections import namedtuple
+from contextlib import asynccontextmanager
+
+import anyio
+from moat.util import Queue
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class _GpioPin:
         Values are (out,level) tuples of bool, with "out" and "high"
         represented as True.
         """
-        q = anyio.create_queue(10)
+        q = Queue(10)
         self.mon.add(q)
         try:
             yield q
@@ -78,7 +79,7 @@ class _GpioPin:
         logger.debug("SET %s %d %s", self.chip, self.pin, value)
         if self.fd is None:
             raise RuntimeError(
-                "Pin %s/%d is not controlled via the 'gpio_mockup' module" % (self.chip, self.pin)
+                f"Pin {self.chip}/{self.pin} is not controlled via the 'gpio_mockup' module"
             )
         os.write(self.fd, b"1" if value else b"0")
         # os.lseek(self.fd, 0, os.SEEK_SET)
@@ -100,7 +101,9 @@ class GpioWatcher:
         sysfs_path: str = "/sys",
     ):
         self.interval = interval
-        self.gpio = open(os.path.join(debugfs_path, "gpio"), "r")
+        self.gpio = open(  # pylint: disable=unspecified-encoding
+            os.path.join(debugfs_path, "gpio"), "r"
+        )
         self.targets = dict()  # chip > line > _GpioPin
         #       self.names = {}
         self.sysfs_path = sysfs_path
@@ -172,7 +175,6 @@ class GpioWatcher:
             else:
                 r = _r_pin.match(line)
                 if not r:
-                    breakpoint()
                     raise ValueError(line)
                 pin = int(r.group("pin")) - base
                 out = r.group("dir") == "out"

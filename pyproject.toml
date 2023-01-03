@@ -1,7 +1,106 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [ "setuptools", "wheel", "setuptools-scm",]
+
+[project]
+classifiers = [
+	"Intended Audience :: Developers",
+	"Programming Language :: Python :: 3",
+	"Framework :: AsyncIO",
+	"Framework :: Trio",
+	"Framework :: AnyIO",
+	"License :: OSI Approved",
+	"Development Status :: 4 - Beta",
+	]
+dependencies = [
+	"anyio ~= 3.0",
+	"cffi",
+	]
+dynamic = [ "version",]
+keywords = [ "MoaT",]
+requires-python = ">=3.8"
+name = "moat-gpio"
+description = "Easy async access to GPIO pins"
+readme = "README.rst"
+[[project.authors]]
+email = "matthias@urlichs.de"
+name = "Matthias Urlichs"
+
+[project.license]
+file = "LICENSE.txt"
+
+[project.urls]
+homepage = "https://m-o-a-t.org"
+repository = "https://github.com/M-o-a-T/moat-gpio"
+
+[tool.flake8]
+max-line-length = 99
+ignore = [
+	"F841",
+	"F401",
+	"E123",
+	"E127",
+	"E203",
+	"E231",
+	"E402",
+	"E502",
+	"E731",
+	"W503",
+	]
+
+[tool.isort]
+line_length = 99
+multi_line_output = 3
+profile = "black"
+
+[tool.setuptools]
+packages = [ "moat.gpio",]
+[tool.setuptools.package-data]
+"*" = ["*.yaml"]
+
+[tool.setuptools_scm]
+
+[tool.black]
+line-length = 99
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py310,check
+
+[testenv]
+setenv = 
+    PYTHONPATH = {env:PYTHONPATH}{:}{toxinidir}
+deps = 
+    trio
+    pytest
+commands = 
+    python3 -mpytest tests/
+
+[testenv:check]
+commands = 
+    pylint moat tests
+    flake8p moat tests
+    black --check moat tests
+deps = 
+    pytest
+    pylint
+    black
+    flake8-pyproject
+    flake8
+
+"""
+
 [tool.towncrier]
 package = "moat-gpio"
 filename = "docs/source/history.rst"
 directory = "newsfragments"
-underlines = ["-", "~", "^"]
-# COOKIECUTTER-TRIO-TODO: fill in the URL below to point to your issue tracker:
+underlines = [ "-", "~", "^",]
 issue_format = "`#{issue} <https://github.com/M-o-a-T/moat-gpio/issues/{issue}>`__"
+
+[tool.pylint]
+[tool.pylint.messages_control]
+disable="wrong-import-order,ungrouped-imports,too-many-nested-blocks,use-dict-literal,unspecified-encoding,too-many-statements,too-many-return-statements,too-many-locals,too-many-instance-attributes,too-many-branches,too-many-arguments,too-few-public-methods,superfluous-parens,no-else-return,no-else-continue,invalid-name,fixme"
+
+[tool.moat]
