@@ -1,7 +1,7 @@
 import anyio
 import moat.gpio as gpio
 """
-This script oggles a pin and watches another. The two are presumed to be connected (hardware wire).
+This script toggles a pin and watches another. The two are presumed to be connected (hardware wire).
 """
 
 
